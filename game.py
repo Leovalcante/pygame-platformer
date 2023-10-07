@@ -77,8 +77,7 @@ class Game:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+                    self.quit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = True
@@ -89,9 +88,8 @@ class Game:
                     if (
                         event.key == pygame.K_c
                         and pygame.key.get_mods() & pygame.K_LCTRL
-                    ):
-                        pygame.quit()
-                        sys.exit()
+                    ) or event.key == pygame.K_ESCAPE:
+                        self.quit()
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = False
@@ -103,6 +101,11 @@ class Game:
             )
             pygame.display.update()
             self.clock.tick(60)
+
+    @staticmethod
+    def quit():
+        pygame.quit()
+        sys.exit()
 
 
 if __name__ == "__main__":
