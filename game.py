@@ -13,7 +13,7 @@ class Game:
         pygame.init()
         pygame.display.set_caption("Ninja game")
         self.screen = pygame.display.set_mode((width, height))
-        self.display = pygame.Surface((width / 2, height / 2))
+        self.display = pygame.Surface((width // 2, height // 2))
 
         self.clock = pygame.time.Clock()
         self.movement = [False, False]
@@ -28,14 +28,33 @@ class Game:
         self.player = PhysicsEntity(self, "player", (50, 50), (8, 15))
         self.tilemap = Tilemap(self)
 
+        self.scroll = [0, 0]
+
     def run(self):
         while True:
             self.display.fill((14, 219, 248))
 
-            self.tilemap.render(self.display)
+            self.scroll[0] += int(
+                (
+                    self.player.rect().centerx
+                    - self.display.get_width() / 2
+                    - self.scroll[0]
+                )
+                / 30
+            )
+            self.scroll[1] += int(
+                (
+                    self.player.rect().centery
+                    - self.display.get_height() / 2
+                    - self.scroll[1]
+                )
+                / 30
+            )
+
+            self.tilemap.render(self.display, offset=self.scroll)
 
             self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
-            self.player.render(self.display)
+            self.player.render(self.display, offset=self.scroll)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

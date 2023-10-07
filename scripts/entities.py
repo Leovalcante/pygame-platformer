@@ -1,4 +1,5 @@
 import pygame
+from pygame.math import Vector2
 
 MAX_FALL_VEOLICITY = 5
 
@@ -54,5 +55,5 @@ class PhysicsEntity:
         if self.collision["bottom"] or self.collision["top"]:
             self.velocity[1] = 0
 
-    def render(self, surf):
-        surf.blit(self.game.assets["player"], self.pos)
+    def render(self, surf, offset=(0, 0)):
+        surf.blit(self.game.assets["player"], Vector2(self.pos) - Vector2(offset))
