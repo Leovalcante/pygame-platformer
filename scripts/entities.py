@@ -7,17 +7,27 @@ MAX_FALL_VEOLICITY = 5
 class PhysicsEntity:
     def __init__(self, game, e_type, pos, size):
         self.game = game
-        self.type = e_type
+        self.e_type = e_type
         self.pos = list(pos)
         self.size = size
         self.velocity = [0, 0]
-        self.collision = {"top": False, "bottom": False, "right": False, "left": False}
+        self.collision = {"up": False, "down": False, "right": False, "left": False}
+
+        self.action = ""
+        self.anim_offset = (-3, -3)
+        self.flip = False
+        self.set_action("idle")
 
     def rect(self):
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
 
+    def set_action(self, action):
+        if action != self.action:
+            self.action = action
+            self.animation = self.game.assets[f"{self.e_type}/{self.action}"].copy()
+
     def update(self, tilemap, movement=None):
-        self.collision = {"top": False, "bottom": False, "right": False, "left": False}
+        self.collision = {"up": False, "down": False, "right": False, "left": False}
 
         if movement is None:
             movement = (0, 0)
@@ -43,17 +53,53 @@ class PhysicsEntity:
             if entity_rect.colliderect(rect):
                 if fm_y > 0:
                     entity_rect.bottom = rect.top
-                    self.collision["bottom"] = True
+                    self.collision["down"] = True
                 if fm_y < 0:
                     entity_rect.top = rect.bottom
-                    self.collision["top"] = True
+                    self.collision["up"] = True
 
                 self.pos[1] = entity_rect.y
 
+        # This is not an if else as i don't want flip
+        # the animation if the character is still
+        if movement[0] > 0:
+            self.flip = False
+        elif movement[0] < 0:
+            self.flip = True
+
         self.velocity[1] = min(MAX_FALL_VEOLICITY, self.velocity[1] + 0.1)
 
-        if self.collision["bottom"] or self.collision["top"]:
+        if self.collision["down"] or self.collision["up"]:
             self.velocity[1] = 0
 
+        self.animation.update()
+
     def render(self, surf, offset=(0, 0)):
-        surf.blit(self.game.assets["player"], Vector2(self.pos) - Vector2(offset))
+        # surf.blit(self.game.assets["player"], Vector2(self.pos) - Vector2(offset))
+        surf.blit(
+            pygame.transform.flip(self.animation.img(), self.flip, False),
+            Vector2(self.pos) - Vector2(offset) + Vector2(self.anim_offset),
+        )
+
+
+class Player(PhysicsEntity):
+    def __init__(self, game, pos, size):
+        super().__init__(game, "player", pos, size)
+        self.air_time = 0
+
+    def update(self, tilemap, movement=(0, 0)):
+        super().update(tilemap, movement)
+
+        self.air_time += 1
+        if self.collision["down"]:
+            self.air_time = 0
+
+        in_air = self.air_time > 4
+        if in_air and self.collision["left"] or self.collision["right"]:
+            self.set_action("wall_slide")
+        elif in_air:
+            self.set_action("jump")
+        elif movement[0] != 0:
+            self.set_action("run")
+        else:
+            self.set_action("idle")
