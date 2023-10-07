@@ -18,6 +18,7 @@ class Cloud:
             self.pos[0] - offset[0] * self.depth,
             self.pos[1] - offset[1] * self.depth,
         )
+        # We use modulo operation to let the cloud reenter the scene when they're gone
         surf.blit(
             self.img,
             (
