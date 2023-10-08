@@ -25,6 +25,7 @@ class Editor:
             "large_decor": load_images(os.path.join("tiles", "large_decor")),
             "grass": load_images(os.path.join("tiles", "grass")),
             "stone": load_images(os.path.join("tiles", "stone")),
+            "spawners": load_images(os.path.join("tiles", "spawners")),
         }
 
         self.tilemap = Tilemap(self, tile_size=16)
