@@ -35,7 +35,8 @@ class Tilemap:
                 matches.append(tile.copy())
                 if not keep:
                     self.offgrid_tiles.remove(tile)
-        for loc, tile in self.tilemap.items():
+        for loc in self.tilemap:
+            tile = self.tilemap[loc]
             if (tile["type"], tile["variant"]) in id_pairs:
                 matches.append(tile.copy())
                 matches[-1]["pos"] = matches[-1]["pos"].copy()
@@ -74,13 +75,12 @@ class Tilemap:
         return rects
 
     def render(self, surf, offset=(0, 0)):
-        for off_tile in self.offgrid_tiles:
+        for tile in self.offgrid_tiles:
             surf.blit(
-                self.game.assets[off_tile["type"]][off_tile["variant"]],
-                (off_tile["pos"][0] - offset[0], off_tile["pos"][1] - offset[1]),
+                self.game.assets[tile["type"]][tile["variant"]],
+                (tile["pos"][0] - offset[0], tile["pos"][1] - offset[1]),
             )
 
-        # Only render tiles within the screen
         for x in range(
             offset[0] // self.tile_size,
             (offset[0] + surf.get_width()) // self.tile_size + 1,
@@ -94,7 +94,10 @@ class Tilemap:
                     tile = self.tilemap[loc]
                     surf.blit(
                         self.game.assets[tile["type"]][tile["variant"]],
-                        Vector2(tile["pos"]) * self.tile_size - Vector2(offset),
+                        (
+                            tile["pos"][0] * self.tile_size - offset[0],
+                            tile["pos"][1] * self.tile_size - offset[1],
+                        ),
                     )
 
     def save(self, path):

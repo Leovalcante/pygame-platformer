@@ -198,3 +198,27 @@ class Player(PhysicsEntity):
 
         if abs(self.dashing) <= 50:
             super().render(surf, offset)
+
+
+class Enemy(PhysicsEntity):
+    def __init__(self, game, pos, size):
+        super().__init__(game, "enemy", pos, size)
+        self.walking = 0
+
+    def update(self, tilemap, movement=None):
+        if movement is None:
+            movement = (0, 0)
+
+        if self.walking:
+            movement = (movement[0] - 0.5 if self.flip else 0.5, movement[1])
+            self.walking = max(self.walking - 0.1, 0)
+        elif random.random() < 0.01:
+            self.walking = random.randint(30, 120)  # number of frames walking
+
+        super().update(tilemap, movement)
+
+    def render(self, surf, offset=None):
+        if offset is None:
+            offset = (0, 0)
+
+        super().render(surf, offset)
