@@ -144,3 +144,11 @@ class Tilemap:
             neighbours = tuple(sorted(neighbours))
             if tile["type"] in AUTOTILE_TYPES and neighbours in AUTOTILE_MAP:
                 tile["variant"] = AUTOTILE_MAP[neighbours]
+
+    def solid_check(self, pos):
+        x = int(pos[0] // self.tile_size)
+        y = int(pos[1] // self.tile_size)
+        tile_loc = f"{x};{y}"
+        if tile_loc in self.tilemap:
+            if self.tilemap[tile_loc]["type"] in PHYSICS_TILES:
+                return self.tilemap[tile_loc]
