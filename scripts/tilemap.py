@@ -1,4 +1,5 @@
 import itertools
+import json
 
 import pygame
 from pygame.math import Vector2
@@ -13,18 +14,6 @@ class Tilemap:
         self.tile_size = tile_size
         self.tilemap = {}
         self.offgrid_tiles = []
-
-        for i in range(10):
-            self.tilemap[f"{3+i};10"] = {
-                "type": "grass",
-                "variant": 1,
-                "pos": (3 + i, 10),
-            }
-            self.tilemap[f"10;{5+i}"] = {
-                "type": "stone",
-                "variant": 1,
-                "pos": (10, 5 + i),
-            }
 
     def tiles_around(self, pos):
         tiles = []
@@ -76,3 +65,31 @@ class Tilemap:
                         self.game.assets[tile["type"]][tile["variant"]],
                         Vector2(tile["pos"]) * self.tile_size - Vector2(offset),
                     )
+
+    def save(self, path):
+        try:
+            fout = open(path, "w")
+            json.dump(
+                {
+                    "tilemap": self.tilemap,
+                    "tile_size": self.tile_size,
+                    "offgrid": self.offgrid_tiles,
+                },
+                fout,
+                separators=(",", ":"),
+            )
+        finally:
+            if fout:
+                fout.close()
+
+    def load(self, path):
+        try:
+            fin = open(path)
+            map_data = json.load(fin)
+        finally:
+            if fin:
+                fin.close()
+
+        self.tilemap = map_data["tilemap"]
+        self.tile_size = map_data["tile_size"]
+        self.offgrid_tiles = map_data["offgrid"]

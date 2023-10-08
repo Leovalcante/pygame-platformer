@@ -27,7 +27,12 @@ class Editor:
             "stone": load_images(os.path.join("tiles", "stone")),
         }
 
-        self.tilemap = Tilemap(self)
+        self.tilemap = Tilemap(self, tile_size=16)
+
+        try:
+            self.tilemap.load("map.json")
+        except FileNotFoundError:
+            raise
 
         self.scroll = [0, 0]
 
@@ -99,11 +104,12 @@ class Editor:
                     if event.button == 1:
                         self.clicking = True
                         if not self.ongrid:
+                            pos = Vector2(mpos) + Vector2(self.scroll)
                             self.tilemap.offgrid_tiles.append(
                                 {
                                     "type": self.tile_list[self.tile_group],
                                     "variant": self.tile_variant,
-                                    "pos": Vector2(mpos) + Vector2(self.scroll),
+                                    "pos": (pos[0], pos[1]),
                                 }
                             )
                     if event.button == 3:
@@ -135,6 +141,19 @@ class Editor:
                     if event.button == 3:
                         self.right_clicking = False
 
+                # Had to duplicate this code for compatibility issues
+                # while scrolling variants
+                if event.type == pygame.MOUSEWHEEL:
+                    if self.shift:
+                        if event.x == 1 or event.x == -1 and event.flipped:
+                            self.tile_variant = (self.tile_variant - 1) % len(
+                                self.assets[self.tile_list[self.tile_group]]
+                            )
+                        if event.x == -1 or event.x == 1 and event.flipped:
+                            self.tile_variant = (self.tile_variant + 1) % len(
+                                self.assets[self.tile_list[self.tile_group]]
+                            )
+
                 if event.type == pygame.QUIT:
                     self.quit()
 
@@ -151,14 +170,14 @@ class Editor:
                     if event.key == pygame.K_g:
                         self.ongrid ^= True
 
-                    if (
-                        event.key == pygame.K_c
-                        and pygame.key.get_mods() & pygame.K_LCTRL
-                    ) or event.key == pygame.K_ESCAPE:
-                        self.quit()
+                    if event.key == pygame.K_o:
+                        self.tilemap.save("map.json")
 
                     if event.key == pygame.K_LSHIFT:
                         self.shift = True
+
+                    if event.key == pygame.K_ESCAPE:
+                        self.quit()
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_a:
