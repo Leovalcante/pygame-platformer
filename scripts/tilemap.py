@@ -6,6 +6,18 @@ from pygame.math import Vector2
 
 NEIGHBOR_OFFSETS = list(itertools.product([-1, 0, 1], repeat=2))
 PHYSICS_TILES = {"grass", "stone"}
+AUTOTILE_TYPES = {"grass", "stone"}
+AUTOTILE_MAP = {
+    tuple(sorted([(1, 0), (0, 1)])): 0,
+    tuple(sorted([(1, 0), (0, 1), (-1, 0)])): 1,
+    tuple(sorted([(-1, 0), (0, 1)])): 2,
+    tuple(sorted([(-1, 0), (0, -1), (0, 1)])): 3,
+    tuple(sorted([(-1, 0), (0, -1)])): 4,
+    tuple(sorted([(-1, 0), (0, -1), (1, 0)])): 5,
+    tuple(sorted([(1, 0), (0, -1)])): 6,
+    tuple(sorted([(1, 0), (0, -1), (0, 1)])): 7,
+    tuple(sorted([(1, 0), (-1, 0), (0, 1), (0, -1)])): 8,
+}
 
 
 class Tilemap:
@@ -93,3 +105,20 @@ class Tilemap:
         self.tilemap = map_data["tilemap"]
         self.tile_size = map_data["tile_size"]
         self.offgrid_tiles = map_data["offgrid"]
+
+    def autotile(self):
+        for loc, tile in self.tilemap.items():
+            neighbours = set()
+            for shift in {(1, 0), (-1, 0), (0, -1), (0, 1)}:
+                check_loc = (
+                    str(tile["pos"][0] + shift[0])
+                    + ";"
+                    + str(tile["pos"][1] + shift[1])
+                )
+                if check_loc in self.tilemap:
+                    if self.tilemap[check_loc]["type"] == tile["type"]:
+                        neighbours.add(shift)
+
+            neighbours = tuple(sorted(neighbours))
+            if tile["type"] in AUTOTILE_TYPES and neighbours in AUTOTILE_MAP:
+                tile["variant"] = AUTOTILE_MAP[neighbours]

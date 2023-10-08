@@ -179,6 +179,9 @@ class Editor:
                     if event.key == pygame.K_ESCAPE:
                         self.quit()
 
+                    if event.key == pygame.K_t:
+                        self.tilemap.autotile()
+
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_a:
                         self.movement[0] = False
