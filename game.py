@@ -48,6 +48,11 @@ class Game:
             "particle/leaf": Animation(
                 load_images(os.path.join("particles", "leaf")), img_dur=20, loop=False
             ),
+            "particle/particle": Animation(
+                load_images(os.path.join("particles", "particle")),
+                img_dur=6,
+                loop=False,
+            ),
         }
         self.clouds = Clouds(self.assets["clouds"], count=16)
         self.player = Player(self, (50, 50), (8, 15))
@@ -127,11 +132,14 @@ class Game:
                         self.movement[1] = True
                     if event.key == pygame.K_UP:
                         self.player.jump()
+                    if event.key == pygame.K_x:
+                        self.player.dash()
                     if (
                         event.key == pygame.K_c
                         and pygame.key.get_mods() & pygame.K_LCTRL
                     ) or event.key == pygame.K_ESCAPE:
                         self.quit()
+
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = False
