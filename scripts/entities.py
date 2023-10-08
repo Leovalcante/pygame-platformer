@@ -18,6 +18,8 @@ class PhysicsEntity:
         self.flip = False
         self.set_action("idle")
 
+        self.last_movement = [0, 0]
+
     def rect(self):
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
 
@@ -67,6 +69,8 @@ class PhysicsEntity:
         elif movement[0] < 0:
             self.flip = True
 
+        self.last_movement = movement
+
         self.velocity[1] = min(MAX_FALL_VEOLICITY, self.velocity[1] + 0.1)
 
         if self.collision["down"] or self.collision["up"]:
@@ -86,6 +90,8 @@ class Player(PhysicsEntity):
     def __init__(self, game, pos, size):
         super().__init__(game, "player", pos, size)
         self.air_time = 0
+        self.jumps = 3
+        self.wall_slide = False
 
     def update(self, tilemap, movement=(0, 0)):
         super().update(tilemap, movement)
@@ -93,13 +99,46 @@ class Player(PhysicsEntity):
         self.air_time += 1
         if self.collision["down"]:
             self.air_time = 0
+            self.jumps = 3
+
+        self.wall_slide = False
 
         in_air = self.air_time > 4
         if in_air and self.collision["left"] or self.collision["right"]:
+            self.wall_slide = True
+            self.velocity[1] = min(self.velocity[1], 0.5)
+
             self.set_action("wall_slide")
-        elif in_air:
-            self.set_action("jump")
-        elif movement[0] != 0:
-            self.set_action("run")
+
+        if not self.wall_slide:
+            if in_air:
+                self.set_action("jump")
+            elif movement[0] != 0:
+                self.set_action("run")
+            else:
+                self.set_action("idle")
+
+        if self.velocity[0] > 0:
+            self.velocity[0] = max(self.velocity[0] - 0.1, 0)
         else:
-            self.set_action("idle")
+            self.velocity[0] = min(self.velocity[0] + 0.1, 0)
+
+    def jump(self):
+        if self.wall_slide:
+            if self.last_movement[0] < 0:
+                self.velocity[0] = 3.5
+                self.velocity[1] = -2.5
+                self.air_time = 5
+                self.jumps = max(0, self.jumps - 1)
+                return True
+            elif self.last_movement[0] > 0:
+                self.velocity[0] = -3.5
+                self.velocity[1] = -2.5
+                self.air_time = 5
+                self.jumps = max(0, self.jumps - 1)
+                return True
+        elif self.jumps:
+            self.jumps -= 1
+            self.velocity[1] = -3
+            self.air_time = 5
+            return True

@@ -126,7 +126,7 @@ class Game:
                     if event.key == pygame.K_RIGHT:
                         self.movement[1] = True
                     if event.key == pygame.K_UP:
-                        self.player.velocity[1] = -3
+                        self.player.jump()
                     if (
                         event.key == pygame.K_c
                         and pygame.key.get_mods() & pygame.K_LCTRL
