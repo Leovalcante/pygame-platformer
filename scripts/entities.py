@@ -5,6 +5,7 @@ import pygame
 from pygame.math import Vector2
 
 from scripts.particles import Particle
+from scripts.sparks import Spark
 
 MAX_FALL_VEOLICITY = 5
 
@@ -228,13 +229,35 @@ class Enemy(PhysicsEntity):
                 )
                 if abs(dis[1]) < tilemap.tile_size:
                     if self.flip and dis[0] < 0:
-                        self.game.projectiles.append(
-                            [[self.rect().centerx - 7, self.rect().centery], -1.5, 0]
-                        )
+                        projectile = [
+                            [self.rect().centerx - 7, self.rect().centery],
+                            -1.5,
+                            0,
+                        ]
+                        self.game.projectiles.append(projectile)
+                        for _ in range(4):
+                            self.game.sparks.append(
+                                Spark(
+                                    projectile[0],
+                                    random.random() - 0.5 + math.pi,
+                                    2 + random.random(),
+                                )
+                            )
                     if not self.flip and dis[0] > 0:
-                        self.game.projectiles.append(
-                            [[self.rect().centerx + 7, self.rect().centery], 1.5, 0]
-                        )
+                        projectile = [
+                            [self.rect().centerx + 7, self.rect().centery],
+                            1.5,
+                            0,
+                        ]
+                        self.game.projectiles.append(projectile)
+                        for _ in range(4):
+                            self.game.sparks.append(
+                                Spark(
+                                    projectile[0],
+                                    random.random() - 0.5,
+                                    2 + random.random(),
+                                )
+                            )
 
         elif random.random() < 0.01:
             self.walking = random.randint(30, 120)  # number of frames walking
