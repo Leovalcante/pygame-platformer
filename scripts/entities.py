@@ -219,7 +219,7 @@ class Enemy(PhysicsEntity):
                     movement = (movement[0] - 0.5 if self.flip else 0.5, movement[1])
             else:
                 self.flip ^= True
-            self.walking = max(self.walking - 0.1, 0)
+            self.walking = max(self.walking - 1, 0)
 
             if not self.walking:
                 dis = (

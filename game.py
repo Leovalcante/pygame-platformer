@@ -65,11 +65,12 @@ class Game:
         self.clouds = Clouds(self.assets["clouds"], count=16)
         self.player = Player(self, (50, 50), (8, 15))
         self.tilemap = Tilemap(self, tile_size=16)
-        try:
-            self.tilemap.load("map.json")
-        except FileNotFoundError:
-            raise
+        self.load_level(0)
 
+        self.scroll = [0, 0]
+
+    def load_level(self, map_id):
+        self.tilemap.load(os.path.join("data", "maps", f"{map_id}.json"))
         self.leaf_spawners = []
         for tree in self.tilemap.extract([("large_decor", 2)], keep=True):
             self.leaf_spawners.append(
@@ -85,8 +86,7 @@ class Game:
 
         self.particles = []
         self.projectiles = []
-
-        self.scroll = [0, 0]
+        self.sparks = []
 
     def run(self):
         while True:
