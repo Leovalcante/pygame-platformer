@@ -69,6 +69,7 @@ class Game:
         self.load_level(0)
 
         self.scroll = [0, 0]
+        self.dead = 0
 
     def load_level(self, map_id):
         self.tilemap.load(os.path.join("data", "maps", f"{map_id}.json"))
@@ -82,16 +83,23 @@ class Game:
         for spawner in self.tilemap.extract([("spawners", 0), ("spawners", 1)]):
             if spawner["variant"] == 0:
                 self.player.pos = spawner["pos"]
+                self.player.air_time = 0
             else:
                 self.enemies.append(Enemy(self, spawner["pos"], (8, 15)))
 
         self.particles = []
         self.projectiles = []
         self.sparks = []
+        self.dead = 0
 
     def run(self):
         while True:
             self.display.blit(self.assets["background"], (0, 0))
+
+            if self.dead:
+                self.dead += 1
+                if self.dead > 40:
+                    self.load_level(0)
 
             self.scroll[0] += (
                 self.player.rect().centerx
@@ -132,8 +140,11 @@ class Game:
                 if kill:
                     self.enemies.remove(enemy)
 
-            self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
-            self.player.render(self.display, offset=render_scroll)
+            if not self.dead:
+                self.player.update(
+                    self.tilemap, (self.movement[1] - self.movement[0], 0)
+                )
+                self.player.render(self.display, offset=render_scroll)
 
             # [[x, y], direction, timer]
             for projectile in self.projectiles.copy():
@@ -164,7 +175,7 @@ class Game:
                 elif abs(self.player.dashing) < 50:
                     if self.player.rect().collidepoint(projectile[0]):
                         self.projectiles.remove(projectile)
-                        print("You're dead")
+                        self.dead += 1
                         for _ in range(30):
                             angle = random.random() * math.pi * 2
                             speed = random.random() * 5
