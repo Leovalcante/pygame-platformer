@@ -96,7 +96,7 @@ class Player(PhysicsEntity):
     def __init__(self, game, pos, size):
         super().__init__(game, "player", pos, size)
         self.air_time = 0
-        self.jumps = 3
+        self.jumps = 1
         self.wall_slide = False
         self.dashing = 0
 
@@ -105,13 +105,13 @@ class Player(PhysicsEntity):
 
         self.air_time += 1
 
-        if self.air_time > 120:
+        if self.air_time > 120 and not self.action == "wall_slide":
             self.game.screenshake = max(16, self.game.screenshake)
             self.game.dead += 1
 
         if self.collision["down"]:
             self.air_time = 0
-            self.jumps = 3
+            self.jumps = 1
 
         self.wall_slide = False
 
